@@ -1,18 +1,32 @@
-
 import streamlit as st
+import joblib
 import requests
 
 st.set_page_config(page_title="Preditor de Nota de Corte SISU", layout="centered")
 
+# Carregar features do modelo
+features = joblib.load("features_xgboost_sisu.pkl")
+
+def extrair_opcoes(prefixo):
+    return sorted({col.replace(prefixo, "") for col in features if col.startswith(prefixo)})
+
+# Opções extraídas do modelo treinado
+cursos = extrair_opcoes("NOME_CURSO_")
+ies = extrair_opcoes("SIGLA_IES_")
+ufs = extrair_opcoes("UF_CAMPUS_")
+graus = extrair_opcoes("GRAU_")
+turnos = extrair_opcoes("TURNO_")
+modalidades = extrair_opcoes("MOD_CONCORRENCIA_")
+
 st.title("Preditor de Nota de Corte SISU")
 st.markdown("Preencha os dados abaixo para obter a **nota de corte estimada**.")
 
-curso = st.selectbox("Curso", ["Engenharia Civil", "Medicina", "Direito", "Administração"])
-sigla_ies = st.selectbox("Instituição (sigla)", ["UFRJ", "USP", "UFBA", "UFMG"])
-uf = st.selectbox("Estado (UF)", ["RJ", "SP", "BA", "MG"])
-grau = st.selectbox("Grau", ["Bacharelado", "Licenciatura", "Tecnológico"])
-turno = st.selectbox("Turno", ["Integral", "Noturno", "Matutino"])
-modalidade = st.selectbox("Modalidade de concorrência", ["AC", "L1", "L2", "L5"])
+curso = st.selectbox("Curso", cursos)
+sigla_ies = st.selectbox("Instituição (sigla)", ies)
+uf = st.selectbox("Estado (UF)", ufs)
+grau = st.selectbox("Grau", graus)
+turno = st.selectbox("Turno", turnos)
+modalidade = st.selectbox("Modalidade de concorrência", modalidades)
 qt_vagas = st.number_input("Quantidade de vagas", min_value=1, max_value=200, value=40)
 
 if st.button("Estimar Nota de Corte"):
